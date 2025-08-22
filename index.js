@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 const express = require('express')
-const mysql = require('mysql2')
+const postgres  = require('postgres')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt');
@@ -60,13 +60,14 @@ const upload = multer({
     }
 });
 
-const conexao = mysql.createConnection({
+const conexao = postgres({
     host: "localhost",
     user: "root",
     password: "",
     port: 3306,
     database: "tcc"
 })
+
 
 
 
@@ -672,4 +673,5 @@ app.put('/editar_tcc', (req, res) => {
 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
