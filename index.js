@@ -12,12 +12,12 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const porta = 3000
+const porta = process.env.PORT || 3000;
 const app = express()
 app.use(express.json())
 const cors = require('cors');
 
-const PORTA = 3000;
+const PORTA = process.env.PORT || 3000;
 const JWT_SECRET = 'sua_chave_secreta_para_assinatura_de_tokens'; // CHAVE SECRETA FIXA AQUI
 const SALT_ROUNDS = 10; // Custo do hash para bcrypt
 
