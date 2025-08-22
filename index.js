@@ -61,7 +61,7 @@ const upload = multer({
 });
 
 const conexao = postgres({
-    host: "dpg-d2kcc6ggjchc73dnnpng-a",
+    host: "dpg-d2kcc6ggjchc73dnnpng-a.oregon-postgres.render.com/db_tcc_jygq",
     user: "db_tcc_jygq_user",
     password: "D9r1tKKtkH5NzSihsq0S5YUFdigyEIrM",
     port: 5432,
