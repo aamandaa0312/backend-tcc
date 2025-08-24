@@ -11,7 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 
-const porta = process.env.PORT || 5432; // Render geralmente define a porta automaticamente
+const porta = process.env.PORT || 10000; // Render geralmente define a porta automaticamente
 const app = express();
 app.use(express.json());
 
@@ -555,3 +555,4 @@ app.put('/editar_tcc', async (req, res) => {
 
 // Servir arquivos estáticos da pasta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
