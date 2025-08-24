@@ -11,7 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 
-const porta = process.env.PORT || 3000;
+const porta = process.env.PORT || 5432;
 const app = express();
 app.use(express.json());
 
@@ -469,4 +469,5 @@ app.put('/editar_tcc', async (req, res) => {
 });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
