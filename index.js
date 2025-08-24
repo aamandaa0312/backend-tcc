@@ -15,31 +15,11 @@ const porta = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
-const JWT_SECRET = process.env.JWT_SECRET || 'seu_jwt_secret_aqui'; // Valor padrão para desenvolvimento
+const JWT_SECRET = process.env.JWT_SECRET;
 const SALT_ROUNDS = 10;
 
 app.get('/', (req, res) => {
     res.send('O servidor back-end do TCC está funcionando!');
-});
-
-// Health check para o Render
-app.get('/health', async (req, res) => {
-  try {
-    // Testar conexão com o banco
-    await conexao.query('SELECT 1');
-    res.status(200).json({ 
-      status: 'OK', 
-      database: 'Connected',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Health check failed:', error);
-    res.status(500).json({ 
-      status: 'Error', 
-      database: 'Disconnected',
-      error: error.message 
-    });
-  }
 });
 
 app.use(cors({
@@ -79,19 +59,11 @@ const upload = multer({
     }
 });
 
-// Configuração melhorada da conexão com o PostgreSQL
+// A conexão agora usa a variável de ambiente do Render
 const conexao = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
-
-// Testar conexão com o banco ao iniciar
-conexao.connect((err, client, release) => {
-    if (err) {
-        console.error('Erro ao conectar com o banco de dados:', err.stack);
-    } else {
-        console.log('Conexão com o banco de dados estabelecida com sucesso!');
-        release();
+    ssl: {
+        rejectUnauthorized: false
     }
 });
 
@@ -496,18 +468,5 @@ app.put('/editar_tcc', async (req, res) => {
     }
 });
 
-// Middleware para tratamento de erros
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    mensagem: 'Erro interno do servidor',
-    erro: process.env.NODE_ENV === 'development' ? err.message : 'Ocorreu um erro'
-  });
-});
-
-// Rota para caso não encontre nenhuma rota
-app.use('*', (req, res) => {
-  res.status(404).json({ mensagem: 'Rota não encontrada' });
-});
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
