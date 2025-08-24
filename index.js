@@ -18,6 +18,10 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET;
 const SALT_ROUNDS = 10;
 
+app.get('/', (req, res) => {
+    res.send('O servidor back-end do TCC está funcionando!');
+});
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -465,3 +469,4 @@ app.put('/editar_tcc', async (req, res) => {
 });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
