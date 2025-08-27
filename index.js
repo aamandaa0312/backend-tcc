@@ -4,7 +4,6 @@ require('dotenv').config();
 const express = require('express')
 const postgres  = require('postgres')
 const crypto = require('crypto')
-const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt');
 const bcryptjs = require('bcryptjs');
 const bodyParser = require('body-parser');
@@ -18,13 +17,11 @@ app.use(express.json())
 const cors = require('cors');
 
 const PORTA = process.env.PORT || 3000;
-const JWT_SECRET = 'sua_chave_secreta_para_assinatura_de_tokens'; // CHAVE SECRETA FIXA AQUI
 const SALT_ROUNDS = 10; // Custo do hash para bcrypt
 
 app.use(cors({
 origin: '*',
-methods: ['GET', 'POST', 'PUT', 'DELETE'],
-allowedHeaders: ['Content-Type', 'Authorization']
+methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
 
@@ -77,29 +74,7 @@ app.listen(porta, () => {
 console.log("o servidor está rodando")
 })
 
-// inicio rotas usuario
 
-
-// Middleware para verificar o token JWT
-function verificarToken(req, res, next) {
-
-const authHeader = req.headers['authorization'];
-const token = authHeader && authHeader.split(' ')[1];
-
-if (!token) {
-return res.status(401).json({ mensagem: 'Acesso não autorizado: Token não fornecido.' });
-}
-
-jwt.verify(token, JWT_SECRET, (err, decoded) => {
-if (err) {
-console.error('Erro de verificação de token:', err);
-return res.status(401).json({ mensagem: 'Acesso não autorizado: Token inválido.' });
-}
-
-req.usuario = decoded;
-next();
-});
-}
 
 const saltRounds = 10;
 
@@ -169,16 +144,10 @@ if (!senhaCorreta) {
 return res.status(401).json({ erro: 'Email ou senha incorretos.' });
 }
 
-// Geração do Token JWT
-const token = jwt.sign(
-{ id: usuario.id, tipo: usuario.tipo, email: usuario.email },
-JWT_SECRET,
-{ expiresIn: '1h' }
-);
+
 
 res.status(200).json({
 mensagem: 'Login bem-sucedido!',
-token,
 usuario: {
 id: usuario.id,
 nome: usuario.nome,
@@ -280,7 +249,7 @@ res.json({ mensagem: "Usuário atualizado com sucesso" });
 });
 
 
-app.get('/perfil', verificarToken, (req, res) => {
+app.get('/perfil', (req, res) => {
 
 const usuarioId = req.usuario.id;
 
@@ -499,15 +468,8 @@ return res.status(401).json({ erro: 'Matrícula ou senha incorretos.' });
 }
 
 
-const token = jwt.sign(
-{ id: usuario.id, tipo: usuario.tipo },
-process.env.JWT_SECRET,
-{ expiresIn: '1h' }
-);
-
 res.status(200).json({
 mensagem: 'Login bem-sucedido!',
-token,
 usuario: {
 id: usuario.id,
 nome: usuario.nome,
