@@ -675,4 +675,4 @@ res.json({ mensagem: 'TCC atualizado com sucesso!' });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-~
+
