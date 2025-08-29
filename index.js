@@ -330,25 +330,25 @@ app.put('/editar_usuario', async (req, res) => {
     }
 });
 
-app.get('/perfil', async (req, res) => {
-    // Assumindo que req.usuario.id é definido por um middleware de autenticação
-    // que você pode precisar implementar. Para este exemplo, vamos simular um ID.
-    const usuarioId = req.usuario ? req.usuario.id : 1; // Substitua por sua lógica de autenticação real
 
-    try {
-        const sql = 'SELECT id, nome, email, tipo FROM usuarios WHERE id = $1';
-        const result = await pool.query(sql, [usuarioId]);
+app.get('/perfil', verificarToken, (req, res) => {
 
-        if (result.rows.length === 0) {
+    const usuarioId = req.usuario.id;
+
+    const sql = 'SELECT id, nome, email, tipo FROM usuarios WHERE id = ?';
+    conexao.query(sql, [usuarioId], (err, resultados) => {
+        if (err) {
+            console.error('Erro ao buscar dados do perfil:', err);
+            return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+        }
+        if (resultados.length === 0) {
             return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
         }
 
-        res.status(200).json(result.rows[0]);
-    } catch (err) {
-        console.error('Erro ao buscar dados do perfil:', err);
-        res.status(500).json({ mensagem: 'Erro interno do servidor.' });
-    }
+        res.status(200).json(resultados[0]);
+    });
 });
+
 
 // Fim rotas usuario
 
