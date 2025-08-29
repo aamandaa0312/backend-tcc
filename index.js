@@ -20,7 +20,8 @@ const SALT_ROUNDS = 10; // Custo do hash para bcrypt
 
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(bodyParser.json());
