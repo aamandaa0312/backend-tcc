@@ -9,11 +9,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const jwt = require ('jsonwebtoken');
 
 const porta = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
+const JWT_SECRET = 'seu_segredo_jwt';
 const SALT_ROUNDS = 10; // Custo do hash para bcrypt
 
 app.use(cors({
@@ -63,7 +65,107 @@ const pool = new Pool({
         rejectUnauthorized: false // Necessário para alguns provedores de hospedagem como Render
     }
 });
+//inicio rotas usuario
+//Middleware para verificar a conexão com o banco de dados
+function verificarToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+  
+    if (!token) {
+      return res.status(401).json({ mensagem: 'Acesso não autorizado: Token não fornecido.' });
+    }
+  
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        console.error('Erro de verificação de token:', err);
+        return res.status(401).json({ mensagem: 'Acesso não autorizado: Token inválido.' });
+      }
+  
+      req.usuario = decoded;
+      next();
+    });
+  }
+   // Rota para cadastrar um novo usuário
+   app.post('/cadastrar_usuario', async (req, res) => {
+    const { nome, email, senha, tipo, curso_id, matricula } = req.body;
+  
+    if (!nome || !email || !senha || !tipo) {
+      return res.status(400).json({ mensagem: 'Todos os campos obrigatórios devem ser preenchidos.' });
+    }
+  
+    try {
+      const senhaHash = await bcrypt.hash(senha, SALT_ROUNDS);
+  
+      // Verificar se o usuário já existe
+      const checkSql = 'SELECT * FROM usuarios WHERE email = $1';
+      const checkResult = await pool.query(checkSql, [email]);
+  
+      if (checkResult.rows.length > 0) {
+        return res.status(409).json({ mensagem: 'Usuário com este email já existe.' });
+      }
+  
+      // Inserir novo usuário
+      const insertSql = `
+        INSERT INTO usuarios (nome, email, senha, tipo, curso_id, matricula)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `;
+      await pool.query(insertSql, [nome, email, senhaHash, tipo, curso_id, matricula]);
+  
+      res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso!' });
+  
+    } catch (err) {
+      console.error('Erro ao cadastrar usuário:', err);
+      res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+    }
+  });
 
+  app.post('/login', async (req, res) => {
+    const { email, senha } = req.body;
+  
+    if (!email || !senha) {
+      return res.status(400).json({ erro: 'Email e senha são obrigatórios.' });
+    }
+  
+    try {
+      const sql = 'SELECT * FROM usuarios WHERE email = $1';
+      const result = await pool.query(sql, [email]);
+  
+      if (result.rows.length === 0) {
+        return res.status(401).json({ erro: 'Email ou senha incorretos.' });
+      }
+  
+      const usuario = result.rows[0];
+      const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+  
+      if (!senhaCorreta) {
+        return res.status(401).json({ erro: 'Email ou senha incorretos.' });
+      }
+  
+      const token = jwt.sign(
+        { id: usuario.id, tipo: usuario.tipo, email: usuario.email },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+  
+      res.status(200).json({
+        mensagem: 'Login bem-sucedido!',
+        token,
+        usuario: {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          tipo: usuario.tipo,
+        },
+      });
+  
+    } catch (err) {
+      console.error('Erro ao buscar usuário:', err);
+      res.status(500).json({ erro: 'Erro interno do servidor.' });
+    }
+  });
+  
+  
+  
 // Testar a conexão com o banco de dados
 pool.on('connect', () => {
     console.log('Conectado ao banco de dados PostgreSQL');
