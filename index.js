@@ -57,10 +57,10 @@ const upload = multer({
 
 // Configuração do Pool de Conexões PostgreSQL
 const pool = new Pool({
-    user: process.env.DB_USER || "db_tcc_jygq_user",
-    host: process.env.DB_HOST || "dpg-d2kcc6ggjchc73dnnpng-a.oregon-postgres.render.com",
-    database: process.env.DB_DATABASE || "db_tcc_jygq",
-    password: process.env.DB_PASSWORD || "D9r1tKKtkH5NzSihsq0S5YUFdigyEIrM",
+    user: process.env.DB_USER || "root",
+    host: process.env.DB_HOST || "dpg-d39tbe3e5dus73boue1g-a",
+    database: process.env.DB_DATABASE || "tcc_n7c3",
+    password: process.env.DB_PASSWORD || "a8qGmMMZLQTdATyFVwkKlM0mgjXJb6YM",
     port: process.env.DB_PORT || 5432,
     ssl: {
         rejectUnauthorized: false // Necessário para alguns provedores de hospedagem como Render
